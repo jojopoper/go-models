@@ -1,6 +1,10 @@
 package checker
 
-import "time"
+import (
+	"time"
+
+	_n "github.com/jojopoper/go-models/notify"
+)
 
 // CheckBase 线程检查基类
 type CheckBase struct {
@@ -10,19 +14,18 @@ type CheckBase struct {
 	beginStart  bool         // 是否为默认启动监控
 	continueRun bool         // 对于非默认监控的线程，标定是否可以结束
 	keyName     string       // 关键字名称
-	funcs       []ReportFunction
 	exe         executeFunction
-	msg         *CheckMessage
+	_n.ReportFunction
 }
 
 // Init 初始化
 func (ths *CheckBase) Init(interval int) {
+	ths.ReportFunction.Init()
 	ths.Interval = interval
 	ths.stop = make(chan RunFlag)
 	ths.isRunning = false
 	ths.beginStart = true
 	ths.continueRun = false
-	ths.funcs = make([]ReportFunction, 0)
 }
 
 // Name 获取名称
@@ -33,16 +36,6 @@ func (ths *CheckBase) Name() string {
 // SetName 设置名称
 func (ths *CheckBase) SetName(n string) {
 	ths.keyName = n
-}
-
-// BeginStop 设置beginStart状态
-func (ths *CheckBase) BeginStop() {
-	ths.beginStart = false
-}
-
-// SetContinue 设置是否继续标识
-func (ths *CheckBase) SetContinue(b bool) {
-	ths.continueRun = b
 }
 
 // SetExeFunc 设置执行函数
@@ -63,6 +56,7 @@ func (ths *CheckBase) do() {
 	if ths.isRunning {
 		return
 	}
+	ths.isRunning = true
 	t1 := time.NewTimer(time.Second * time.Duration(ths.Interval))
 	for {
 		select {
@@ -100,24 +94,25 @@ func (ths *CheckBase) IsBeginStart() bool {
 	return ths.beginStart
 }
 
+// SetContinue 设置是否继续标识
+func (ths *CheckBase) SetContinue(b bool) {
+	ths.continueRun = b
+}
+
+// SetBeginStart 设置默认启动监控
+func (ths *CheckBase) SetBeginStart(b bool) {
+	ths.beginStart = b
+}
+
+// BeginStop 设置beginStart状态
+func (ths *CheckBase) BeginStop() {
+	ths.beginStart = false
+}
+
 // RegistManager 将自己注册进入管理map
 func (ths *CheckBase) RegistManager(m map[string]ICheckInterface) ICheckInterface {
 	if m != nil {
 		m[ths.keyName] = ths
 	}
 	return ths
-}
-
-// AddReportFunc 添加报告函数
-func (ths *CheckBase) AddReportFunc(f ReportFunction) {
-	if !ths.isRunning {
-		ths.funcs = append(ths.funcs, f)
-	}
-}
-
-// Report 向注册方法汇报内容
-func (ths *CheckBase) Report(sender ICheckInterface, msg *CheckMessage) {
-	for _, f := range ths.funcs {
-		go f(sender, msg)
-	}
 }

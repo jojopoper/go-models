@@ -68,11 +68,11 @@ func (ths *ManageBase) initEngine() {
 	case PostgresDriver:
 		ths.dbEngine, err = ths.getPostgresEngine()
 	}
-	if ths.dbEngine == nil {
-		panic(fmt.Errorf("[ManageBase:initEngine] Undefined db type = %s\n", ths.dbInfo.DbType))
-	}
 	if err != nil {
 		panic(fmt.Errorf("[ManageBase:initEngine] init engine has error = \n%+v\n", err))
+	}
+	if ths.dbEngine == nil {
+		panic(fmt.Errorf("[ManageBase:initEngine] Undefined db type = %s\n", ths.dbInfo.DbType))
 	}
 	ths.dbEngine.ShowDebug = ths.dbInfo.IsDebug
 	ths.dbEngine.ShowInfo = ths.dbInfo.IsDebug
@@ -135,17 +135,26 @@ func (ths *ManageBase) Update(operationKey string, val interface{}) error {
 	return ths.operations[operationKey].Query(QtUpdateOneRecord, val)
 }
 
-// GetLastRecord 获取最新cnt条记录
-func (ths *ManageBase) GetLastRecord(operationKey string, val ...interface{}) error {
+// Count 获取记录数量
+// val: conditions(string),count(*int64),typeof struct
+func (ths *ManageBase) Count(operationKey string, val ...interface{}) error {
+	return ths.operations[operationKey].Query(QtCount, val...)
+}
+
+// GetLastRecords 获取最新cnt条记录
+// val: cnt(int),orderkey(string),typeof struct
+func (ths *ManageBase) GetLastRecords(operationKey string, val ...interface{}) error {
 	return ths.operations[operationKey].Query(QtGetLastRecords, val...)
 }
 
 // GetRecords 获取cnt条记录
+// val: conditions(string),orderkey(string),cnt(int),isdesc(bool),typeof struct
 func (ths *ManageBase) GetRecords(operationKey string, val ...interface{}) error {
 	return ths.operations[operationKey].Query(QtQuaryRecords, val...)
 }
 
 // GetAllRecords 获取所有记录
+// val: conditions(string),orderkey(string),isdesc(bool),typeof struct
 func (ths *ManageBase) GetAllRecords(operationKey string, val ...interface{}) error {
 	return ths.operations[operationKey].Query(QtQuaryAllRecords, val...)
 }

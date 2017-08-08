@@ -71,37 +71,42 @@ func (ths *OperationBase) Query(qtype int, v ...interface{}) error {
 	switch qtype {
 	case QtAddOneRecord:
 		if ths.addFunc == nil {
-			return fmt.Errorf("[OperationBase:Query()] Please sign to addFunc before you call this function")
+			return fmt.Errorf("[OperationBase:Query():Add] Please sign to addFunc before you call this function")
 		}
 		return ths.addFunc(v[0])
 	case QtGetOneRecord:
 		if ths.getFunc == nil {
-			return fmt.Errorf("[OperationBase:Query()] Please sign to getFunc before you call this function")
+			return fmt.Errorf("[OperationBase:Query():Get] Please sign to getFunc before you call this function")
 		}
 		return ths.getFunc(v[0])
 	case QtDeleteOneRecord:
 		if ths.removeFunc == nil {
-			return fmt.Errorf("[OperationBase:Query()] Please sign to removeFunc before you call this function")
+			return fmt.Errorf("[OperationBase:Query():Delete] Please sign to removeFunc before you call this function")
 		}
 		return ths.removeFunc(v[0])
 	case QtUpdateOneRecord:
 		if ths.updateFunc == nil {
-			return fmt.Errorf("[OperationBase:Query()] Please sign to updateFunc before you call this function")
+			return fmt.Errorf("[OperationBase:Query():Update] Please sign to updateFunc before you call this function")
 		}
 		return ths.updateFunc(v[0])
+	case QtCount:
+		if len(v) != 3 {
+			return fmt.Errorf("[OperationBase:Query():Count] Input parameter has to 3, Parameter conditions(string),count(*int64),typeof struct")
+		}
+		return ths.count(v[0].(string), v[1].(*int64), v[2])
 	case QtGetLastRecords:
 		if len(v) != 3 {
-			return fmt.Errorf("[OperationBase:Query()] Input parameter has to 3, Parameter cnt,orderkey,typeof struct")
+			return fmt.Errorf("[OperationBase:Query():LastRecords] Input parameter has to 3, Parameter cnt(int),orderkey(string),typeof struct")
 		}
 		return ths.getLastRecord(v[0].(int), v[1].(string), v[2])
 	case QtQuaryRecords:
 		if len(v) != 5 {
-			return fmt.Errorf("[OperationBase:Query()] Input parameter has to 5, Parameter conditions,orderkey,cnt,isdesc,typeof struct")
+			return fmt.Errorf("[OperationBase:Query():Records] Input parameter has to 5, Parameter conditions(string),orderkey(string),cnt(int),isdesc(bool),typeof struct")
 		}
 		return ths.getRecords(v[0].(string), v[1].(string), v[2].(int), v[3].(bool), v[4])
 	case QtQuaryAllRecords:
 		if len(v) != 4 {
-			return fmt.Errorf("[OperationBase:Query()] Input parameter has to 4, Parameter conditions,orderkey,isdesc,typeof struct")
+			return fmt.Errorf("[OperationBase:Query():AllRecords] Input parameter has to 4, Parameter conditions(string),orderkey(string),isdesc(bool),typeof struct")
 		}
 		return ths.getAllRecords(v[0].(string), v[1].(string), v[3].(bool), v[4])
 	}
@@ -132,6 +137,19 @@ func (ths *OperationBase) remove(v interface{}) error {
 
 func (ths *OperationBase) update(v interface{}) error {
 	_, err := ths.engine.Update(v)
+	return err
+}
+
+func (ths *OperationBase) count(conditions string, cnt *int64, v interface{}) error {
+	session := ths.engine.NewSession()
+	defer session.Close()
+	if len(conditions) > 0 {
+		session = session.Where(conditions)
+	}
+	c, err := session.Count(v)
+	if err == nil {
+		*cnt = c
+	}
 	return err
 }
 

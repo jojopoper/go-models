@@ -25,9 +25,10 @@ const (
 	QtGetLastRecords             // 获取最近的N条记录
 	QtQuaryRecords               // 获取指定的N条记录
 	QtQuaryAllRecords            // 获取所有记录
+	QtCount                      // 获取数量
 
 	MySqlDriver    DatabaseType = "mysql"
-	sqliteDriver   DatabaseType = "sqlite3"
+	SqliteDriver   DatabaseType = "sqlite3"
 	PostgresDriver DatabaseType = "postgres"
 
 	AddFuncType    GernalFuncType = 1

@@ -6,7 +6,7 @@ import (
 
 // CheckParamValid 检查输入参数合法
 type CheckParamValid struct {
-	resultData *OperationResult
+	OperationRetData *OperationResult
 }
 
 // ValidParam 参数检查

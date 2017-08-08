@@ -1,7 +1,8 @@
 package checker
 
-// ReportFunction 结果报告函数指针定义
-type ReportFunction func(sender ICheckInterface, msg *CheckMessage)
+import (
+	_n "github.com/jojopoper/go-models/notify"
+)
 
 // executeFunction 执行函数的定义
 type executeFunction func()
@@ -21,5 +22,6 @@ type ICheckInterface interface {
 	IsRunning() bool
 	IsBeginStart() bool
 	RegistManager(m map[string]ICheckInterface) ICheckInterface
-	AddReportFunc(f ReportFunction)
+	AddReportFunc(f _n.ReportFunc)
+	AddReportFuncs(f ..._n.ReportFunc)
 }
