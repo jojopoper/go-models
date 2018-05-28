@@ -8,7 +8,7 @@ import (
 
 // CheckBase 线程检查基类
 type CheckBase struct {
-	Interval    int          // 周期检测间隔 单位：秒
+	Interval    int          // 周期检测间隔 单位：毫秒
 	stop        chan RunFlag // 强制停止标志
 	isRunning   bool         // 标示是否正在运行
 	beginStart  bool         // 是否为默认启动监控
@@ -19,6 +19,7 @@ type CheckBase struct {
 }
 
 // Init 初始化
+// interval : 运行间隔 单位：毫秒ms
 func (ths *CheckBase) Init(interval int) {
 	ths.ReportFunction.Init()
 	ths.Interval = interval
@@ -57,13 +58,13 @@ func (ths *CheckBase) do() {
 		return
 	}
 	ths.isRunning = true
-	t1 := time.NewTimer(time.Second * time.Duration(ths.Interval))
+	t1 := time.NewTimer(time.Millisecond * time.Duration(ths.Interval))
 	for {
 		select {
 		case <-t1.C:
 			ths.exe()
 			if ths.beginStart || ths.continueRun {
-				t1.Reset(time.Second * time.Duration(ths.Interval))
+				t1.Reset(time.Millisecond * time.Duration(ths.Interval))
 			} else {
 				go ths.Stop()
 			}

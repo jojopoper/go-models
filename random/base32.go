@@ -1,6 +1,7 @@
 package random
 
 import (
+	"sync"
 	"encoding/base32"
 )
 
@@ -9,6 +10,7 @@ var RB32Instance *RBase32
 
 // RBase32 随机Base32字符定义
 type RBase32 struct {
+	sync.Mutex
 	RBytes
 }
 
@@ -18,6 +20,8 @@ func init() {
 
 // RandomBase32 随机N个Base32字符
 func (ths *RBase32) RandomBase32(length int) (ret string, err error) {
+	ths.Lock()
+	defer ths.Unlock()
 	rd, err := ths.RandomBytes(length)
 	if err == nil {
 		ret = base32.StdEncoding.EncodeToString(rd)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 )
@@ -74,11 +75,14 @@ func (ths *ManageBase) initEngine() {
 	if ths.dbEngine == nil {
 		panic(fmt.Errorf("[ManageBase:initEngine] Undefined db type = %s\n", ths.dbInfo.DbType))
 	}
-	ths.dbEngine.ShowDebug = ths.dbInfo.IsDebug
-	ths.dbEngine.ShowInfo = ths.dbInfo.IsDebug
-	ths.dbEngine.ShowSQL = ths.dbInfo.IsDebug
-	ths.dbEngine.ShowErr = true
-	ths.dbEngine.ShowWarn = true
+	ths.dbEngine.SetLogLevel(core.LOG_ERR)
+	ths.dbEngine.ShowExecTime(false)
+	ths.dbEngine.ShowSQL(true)
+	// ths.dbEngine.ShowDebug = ths.dbInfo.IsDebug
+	// ths.dbEngine.ShowInfo = ths.dbInfo.IsDebug
+	// ths.dbEngine.ShowSQL = ths.dbInfo.IsDebug
+	// ths.dbEngine.ShowErr = true
+	// ths.dbEngine.ShowWarn = true
 }
 
 func (ths *ManageBase) getMySQLEngine() (*xorm.Engine, error) {
